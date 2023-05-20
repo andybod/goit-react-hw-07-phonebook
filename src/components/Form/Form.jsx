@@ -1,65 +1,54 @@
-import { useState } from 'react';
-import React from 'react';
-import PropTypes from 'prop-types';
-import css from './Form.module.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/operations';
+import { getContacts } from 'redux/selectors';
+import { BtnAdd, Form, Input, Title } from './Form.styled';
 
-const Form = ({ createContact }) => {
-  const [name, setName] = useState('');
-  const [number, setNamber] = useState('');
-  const handleChecked = ({ target }) => {
-    if (target.name === 'name') {
-      setName(target.value);
-    } else if (target.name === 'number') {
-      setNamber(target.value);
-    }
-  };
-  const handleSubmit = e => {
+const BookForm = () => {
+  const { items } = useSelector(getContacts);
+  const dispatch = useDispatch();
+
+  const addNewName = e => {
     e.preventDefault();
-    createContact(name, number);
-    setNamber('');
-    setName('');
-  };
-  return (
-    <>
-      <div className={css.containerForm}>
-        <form onSubmit={handleSubmit} className={css.form}>
-          <div className={css.wrap}>
-            {' '}
-            <label htmlFor="name">Name</label>
-            <input
-              type="text"
-              name="name"
-              pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-              title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-              required
-              onChange={handleChecked}
-              value={name}
-            />
-          </div>
-          <div className={css.wrap}>
-            <label htmlFor="number">Namber</label>
-            <input
-              type="tel"
-              name="number"
-              pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-              title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-              required
-              onChange={handleChecked}
-              value={number}
-            />
-          </div>
+    const { name, number } = e.target.elements;
 
-          <button type="submit" className={css.btn}>
-            Add contact
-          </button>
-        </form>
-      </div>
-    </>
+    const checkedName = items.find(elem => {
+      return elem.name === name.value;
+    });
+
+    if (checkedName) {
+      alert(`${name.value} is already in contacts.`);
+      return;
+    }
+
+    dispatch(addContact({ name: name.value, phone: number.value }));
+
+    name.value = '';
+    number.value = '';
+  };
+
+  return (
+    <Form action="" onSubmit={addNewName}>
+      <Title>Name</Title>
+      <Input
+        type="text"
+        name="name"
+        pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+        title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+        required
+      />
+
+      <Title>Number</Title>
+      <Input
+        type="tel"
+        name="number"
+        pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+        title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+        required
+      />
+
+      <BtnAdd type="submit">Add contact</BtnAdd>
+    </Form>
   );
 };
 
-export default Form;
-
-Form.propTypes = {
-  createContact: PropTypes.func.isRequired,
-};
+export default BookForm;
